@@ -6,6 +6,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import allure
 import time, os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 USERNAME = os.getenv("BROWSERSTACK_USERNAME")
 ACCESS_KEY = os.getenv("BROWSERSTACK_ACCESS_KEY")
