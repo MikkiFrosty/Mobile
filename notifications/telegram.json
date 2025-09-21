@@ -1,0 +1,17 @@
+{
+  "base": {
+    "project": "Ozon_Deposit",
+    "environment": "DEV",
+    "comment": "No comment",
+    "reportLink": "https://jenkins.autotests.cloud/job/Mobile%20Test%20QA%20GURU/",
+    "language": "ru",
+    "allureFolder": "allure-report",
+    "enableChart": true,
+    "enableSuitesPublishing": true
+  },
+  "telegram": {
+    "token": "${TELEGRAM_BOT_TOKEN}",
+    "chat": "${TELEGRAM_CHAT_ID}",
+    "replyTo": ""
+  }
+}
