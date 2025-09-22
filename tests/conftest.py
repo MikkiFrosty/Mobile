@@ -20,7 +20,7 @@ def capabilities():
         "platformName": "android",
         "platformVersion": "12.0",
         "deviceName": "Samsung Galaxy S22 Ultra",
-        "app": os.getenv("BS_APP_ID", "bs://<app-id>"),
+        "app": os.getenv("BS_APP_ID", "bs://b05576e26d6f90b589e9ff5293c2af443ee75633"),
     })
     return opts
 
