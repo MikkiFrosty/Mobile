@@ -2,7 +2,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-
+@allure.suite("test android")
 @allure.title("Поиск статьи в Wikipedia")
 def test_search_article(driver):
     with allure.step("Skipping onboarding"):
