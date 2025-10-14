@@ -48,11 +48,13 @@ def mobile_driver(cfg):
                 "osVersion": cfg.os_version,
                 "debug": True,
                 "networkLogs": True,
-                "video": True
+                "video": True,
+                "userName": cfg.username,  # ← добавить
+                "accessKey": cfg.access_key
             }
         }
         options = UiAutomator2Options().load_capabilities(caps)
-        driver = webdriver.Remote(f"http://{cfg.username}:{cfg.access_key}@hub.browserstack.com/wd/hub", options=options)
+        driver = webdriver.Remote("http://hub.browserstack.com/wd/hub", options=options)
     else:
         caps = {
             "platformName": "Android",

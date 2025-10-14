@@ -1,10 +1,17 @@
 import pytest, allure
 from appium.webdriver.common.appiumby import AppiumBy
+from utils.onboarding import skip_onboarding_if_present
 
 pytestmark = pytest.mark.mobile
 
 @allure.title("Поиск — показываются подсказки")
 def test_wiki_search_suggest(mobile_driver):
+    driver = mobile_driver
+    try:
+        driver.execute_script('browserstack_executor: {"action": "setSessionName", "arguments": {"name": \"test_wiki_search_suggest"}}')
+    except Exception:
+        pass
+    skip_onboarding_if_present(driver)
     d = mobile_driver
     with allure.step("Открываем поиск"):
         d.find_element(AppiumBy.ACCESSIBILITY_ID, "Search Wikipedia").click()

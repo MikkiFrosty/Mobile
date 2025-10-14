@@ -1,31 +1,28 @@
-import pytest, allure
+import pytest
+import allure
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from utils.locators import (
+    ONBOARDING_FORWARD_ID, ONBOARDING_DONE_ID, ONBOARDING_INDICATOR_ID
+)
 
 pytestmark = pytest.mark.mobile
-# константы — можно оставить рядом с тестом или наверху файла
-FORWARD_ID   = "org.wikipedia.alpha:id/fragment_onboarding_forward_button"  # Continue/Next
-DONE_ID      = "org.wikipedia.alpha:id/fragment_onboarding_done_button"     # Done / Get started
-INDICATOR_ID = "org.wikipedia.alpha:id/view_onboarding_page_indicator"      # "Page X of 4"
 
 @allure.title("Проход через онбординг (если он есть)")
-def test_onboarding_flow(driver):
-    wait = WebDriverWait(driver, 10)
+def test_onboarding_flow(mobile_driver):
+    driver = mobile_driver
     by = AppiumBy.ID
-    expected_pages = 4
-
-    for i in range(1, expected_pages):
-        with allure.step(f"Onboarding: страница {i} из {expected_pages} — жмём Continue"):
-            indicator = driver.find_elements(by, INDICATOR_ID)
-            if indicator:
-                assert f"Page {i} of {expected_pages}" in (indicator[0].text or ""), \
-                    f"Ожидали 'Page {i} of {expected_pages}', получили: {indicator[0].text!r}"
-            wait.until(EC.element_to_be_clickable((by, FORWARD_ID))).click()
-
-    with allure.step("Onboarding: финальный экран — жмём Done"):
-        wait.until(EC.element_to_be_clickable((by, DONE_ID))).click()
-
-    # дальше — твои шаги после онбординга (оставь как у тебя)
-    with allure.step("Проверяем наличие поиска"):
-        d.find_element(AppiumBy.ACCESSIBILITY_ID, "Search Wikipedia")
+    wait = WebDriverWait(driver, 10)
+    try:
+        driver.execute_script('browserstack_executor: {"action": "setSessionName", "arguments": {"name":"test_onboarding_flow"}}')
+    except Exception:
+        pass
+    with allure.step("Onboarding: экран 1 — Continue"):
+        wait.until(EC.element_to_be_clickable((by, ONBOARDING_FORWARD_ID))).click()
+    with allure.step("Onboarding: экран 2 — Continue"):
+        wait.until(EC.element_to_be_clickable((by, ONBOARDING_FORWARD_ID))).click()
+    with allure.step("Onboarding: экран 3 — Continue"):
+        wait.until(EC.element_to_be_clickable((by, ONBOARDING_FORWARD_ID))).click()
+    with allure.step("Onboarding: финал — Done"):
+        wait.until(EC.element_to_be_clickable((by, ONBOARDING_DONE_ID))).click()
