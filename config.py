@@ -25,6 +25,6 @@ class BStackConfig(BaseConfig):
     os_version: str = os.getenv("BS_OS_VERSION", "13.0")
 
 def load_config(env: EnvName):
-    dotenv_file = ".env.local" if env == "local" else ".env.bstack"
+    dotenv_file = ".env"
     load_dotenv(dotenv_file, override=True)
     return LocalConfig() if env == "local" else BStackConfig()
