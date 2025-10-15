@@ -1,10 +1,11 @@
 import os
-import pytest
+
 import allure
+import pytest
 import requests
 from appium import webdriver
-from appium import webdriver
 from appium.options.android import UiAutomator2Options
+
 from config import load_config
 
 def _attach_bs_video(session_id: str):
@@ -49,7 +50,7 @@ def mobile_driver(cfg):
                 "debug": True,
                 "networkLogs": True,
                 "video": True,
-                "userName": cfg.username,  # ← добавить
+                "userName": cfg.username,
                 "accessKey": cfg.access_key
             }
         }
