@@ -13,7 +13,7 @@ from utils.locators import (
 
 pytestmark = pytest.mark.mobile
 
-@allure.title("Проход через онбординг")
+@allure.title("Проход через онбординг (если он есть)")
 def test_onboarding_flow(mobile_driver):
     driver = mobile_driver
     by = AppiumBy.ID

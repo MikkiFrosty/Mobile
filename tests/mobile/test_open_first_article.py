@@ -15,7 +15,7 @@ from utils.locators import (
 pytestmark = pytest.mark.mobile
 
 
-@allure.title("Открытие первой статьи из поиска")
+@allure.title("Открытие первой статьи из поиска (игнорируем попапы)")
 def test_open_first_article(mobile_driver):
     driver = mobile_driver
     try:
