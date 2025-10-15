@@ -1,3 +1,4 @@
+
 import os
 import pytest
 import allure
@@ -7,20 +8,32 @@ from appium.options.android import UiAutomator2Options
 from dotenv import load_dotenv
 
 def load_env():
-    env_context = os.getenv("ENV_CONTEXT")
-    if env_context and os.path.exists(f".env.{env_context}"):
-        load_dotenv(f".env.{env_context}")
+    ctx = os.getenv("ENV_CONTEXT")
+    if ctx and os.path.exists(f".env.{ctx}"):
+        load_dotenv(f".env.{ctx}")
     else:
         load_dotenv(".env")
 
 load_env()
 
+def _endpoint_bstack():
+    user = os.getenv("BROWSERSTACK_USERNAME")
+    key = os.getenv("BROWSERSTACK_ACCESS_KEY")
+    host = os.getenv("BROWSERSTACK_HOST", "hub.browserstack.com")
+    if user and key:
+        return f"https://{user}:{key}@{host}/wd/hub"
+    # Fallback (will likely 401, but we attach a hint)
+    allure.attach("BROWSERSTACK_USERNAME/ACCESS_KEY not set -> expect 401 Authorization Required",
+                  name="bstack auth warning", attachment_type=allure.attachment_type.TEXT)
+    return f"https://{host}/wd/hub"
+
 def _create_bstack_driver():
+    app_id = os.getenv("APP") or os.getenv("BROWSERSTACK_APP_ID")
     desired_caps = {
         "platformName": "Android",
         "deviceName": os.getenv("DEVICE_NAME"),
         "os_version": os.getenv("OS_VERSION"),
-        "app": os.getenv("APP"),
+        "app": app_id,
         "automationName": "UiAutomator2",
         "project": "QA-GURU Mobile",
         "build": os.getenv("BS_BUILD_NAME", "Default Build"),
@@ -29,7 +42,7 @@ def _create_bstack_driver():
         "newCommandTimeout": 120
     }
     options = UiAutomator2Options().load_capabilities(desired_caps)
-    drv = webdriver.Remote("http://hub.browserstack.com/wd/hub", options=options)
+    drv = webdriver.Remote(_endpoint_bstack(), options=options)
     return drv
 
 def _create_local_driver():
@@ -44,46 +57,26 @@ def _create_local_driver():
         "newCommandTimeout": 120,
     }
     options = UiAutomator2Options().load_capabilities(desired_caps)
-    appium_server = os.getenv("APPIUM_SERVER", "http://127.0.0.1:4723/wd/hub")
-    drv = webdriver.Remote(appium_server, options=options)
+    server = os.getenv("APPIUM_SERVER", "http://127.0.0.1:4723/wd/hub")
+    drv = webdriver.Remote(server, options=options)
     return drv
 
-def _is_bstack_mode():
-    # DEFAULT: BrowserStack, unless ENV explicitly set to 'local'
+def _use_bstack_by_default():
     env = os.getenv("ENV")
-    if env and env.strip().lower() == "local":
-        return False
-    return True
-
-def _attach_bstack_video(session_id: str):
-    user = os.getenv("BROWSERSTACK_USERNAME")
-    key = os.getenv("BROWSERSTACK_ACCESS_KEY")
-    if not (user and key):
-        return
-    try:
-        url = f"https://api.browserstack.com/app-automate/sessions/{session_id}.json"
-        resp = requests.get(url, auth=(user, key), timeout=10)
-        if resp.status_code == 200:
-            video_url = resp.json().get("automation_session", {}).get("video_url")
-            if video_url:
-                allure.attach(video_url, name="BrowserStack video", attachment_type=allure.attachment_type.URI_LIST)
-    except Exception as e:
-        allure.attach(str(e), name="bs_video_error", attachment_type=allure.attachment_type.TEXT)
+    return not (env and env.strip().lower() == "local")
 
 @pytest.fixture(scope="function")
 def mobile_driver():
-    bstack = _is_bstack_mode()
-    endpoint = "hub.browserstack.com" if bstack else os.getenv("APPIUM_SERVER", "http://127.0.0.1:4723/wd/hub")
-
+    bstack = _use_bstack_by_default()
+    endpoint = _endpoint_bstack() if bstack else os.getenv("APPIUM_SERVER", "http://127.0.0.1:4723/wd/hub")
     with allure.step(f"Инициализация драйвера ({'BrowserStack' if bstack else 'Local'})"):
         drv = _create_bstack_driver() if bstack else _create_local_driver()
-        allure.attach(f"env={'bstack' if bstack else 'local'}\nendpoint={endpoint}",
+        safe_endpoint = endpoint.replace(os.getenv("BROWSERSTACK_ACCESS_KEY",""), "***") if "@" in endpoint else endpoint
+        allure.attach(f"env={'bstack' if bstack else 'local'}\nendpoint={safe_endpoint}",
                       name="driver context", attachment_type=allure.attachment_type.TEXT)
-
     try:
         yield drv
     finally:
-        # attachments
         try:
             allure.attach(drv.get_screenshot_as_png(), name="screenshot", attachment_type=allure.attachment_type.PNG)
         except Exception:
@@ -93,10 +86,21 @@ def mobile_driver():
         except Exception:
             pass
         if bstack:
-            _attach_bstack_video(drv.session_id)
+            user = os.getenv("BROWSERSTACK_USERNAME")
+            key = os.getenv("BROWSERSTACK_ACCESS_KEY")
+            session_id = getattr(drv, "session_id", None)
+            if user and key and session_id:
+                try:
+                    url = f"https://api.browserstack.com/app-automate/sessions/{session_id}.json"
+                    r = requests.get(url, auth=(user, key), timeout=10)
+                    if r.status_code == 200:
+                        v = r.json().get("automation_session", {}).get("video_url")
+                        if v:
+                            allure.attach(v, name="BrowserStack video", attachment_type=allure.attachment_type.URI_LIST)
+                except Exception:
+                    pass
         drv.quit()
 
-# Alias for tests that expect `driver`
 @pytest.fixture(scope="function")
 def driver(mobile_driver):
     return mobile_driver
