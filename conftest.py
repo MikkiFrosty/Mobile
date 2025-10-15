@@ -20,8 +20,7 @@ def load_env():
 
 load_env()
 
-@pytest.fixture(scope="function")
-def driver():
+def _create_driver():
     env_type = os.getenv("ENV", "local")
 
     if env_type == "bstack":
@@ -37,9 +36,8 @@ def driver():
             "autoGrantPermissions": True,
             "newCommandTimeout": 120
         }
-
         options = UiAutomator2Options().load_capabilities(desired_caps)
-        driver = webdriver.Remote(
+        drv = webdriver.Remote(
             command_executor="http://hub.browserstack.com/wd/hub",
             options=options
         )
@@ -56,22 +54,27 @@ def driver():
         }
         options = UiAutomator2Options().load_capabilities(desired_caps)
         appium_server = os.getenv("APPIUM_SERVER", "http://127.0.0.1:4723/wd/hub")
-        driver = webdriver.Remote(appium_server, options=options)
+        drv = webdriver.Remote(appium_server, options=options)
+    return drv, env_type
 
-    yield driver
-
-    # Attachments after test
+def _teardown_and_attachments(drv, env_type):
     try:
-        png = driver.get_screenshot_as_png()
-        allure.attach(png, name="screenshot", attachment_type=allure.attachment_type.PNG)
-        src = driver.page_source
-        allure.attach(src, name="page source", attachment_type=allure.attachment_type.XML)
+        try:
+            png = drv.get_screenshot_as_png()
+            allure.attach(png, name="screenshot", attachment_type=allure.attachment_type.PNG)
+        except Exception as e:
+            allure.attach(str(e), name="screenshot_error", attachment_type=allure.attachment_type.TEXT)
+        try:
+            src = drv.page_source
+            allure.attach(src, name="page source", attachment_type=allure.attachment_type.XML)
+        except Exception as e:
+            allure.attach(str(e), name="pagesource_error", attachment_type=allure.attachment_type.TEXT)
 
         if env_type == "bstack":
             user = os.getenv("BROWSERSTACK_USERNAME")
             key = os.getenv("BROWSERSTACK_ACCESS_KEY")
             if user and key:
-                session_id = driver.session_id
+                session_id = drv.session_id
                 url = f"https://api.browserstack.com/app-automate/sessions/{session_id}.json"
                 try:
                     resp = requests.get(url, auth=(user, key), timeout=10)
@@ -83,4 +86,18 @@ def driver():
                 except Exception as e:
                     allure.attach(str(e), name="bs_video_error", attachment_type=allure.attachment_type.TEXT)
     finally:
-        driver.quit()
+        drv.quit()
+
+@pytest.fixture(scope="function")
+def mobile_driver():
+    with allure.step("Инициализация драйвера (mobile_driver)"):
+        drv, env_type = _create_driver()
+    try:
+        yield drv
+    finally:
+        _teardown_and_attachments(drv, env_type)
+
+# Alias for compatibility with tests that import `driver`
+@pytest.fixture(scope="function")
+def driver(mobile_driver):
+    return mobile_driver
