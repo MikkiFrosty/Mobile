@@ -1,0 +1,53 @@
+# === Python базовые ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# === Виртуальное окружение ===
+.venv/
+env/
+venv/
+
+# === Конфиги окружений ===
+.env
+.env.*
+!*.example  # оставляем примерные .env-файлы
+
+# === Отчёты и логи ===
+allure-report/
+reports/
+*.log
+*.tmp
+
+# === IDE ===
+.idea/
+.vscode/
+
+# === Кеши и мусор ===
+.DS_Store
+Thumbs.db
+*.zip
+*.bak
+*.swp
+
+# === PyCharm специфичное ===
+*.iml
+*.ipr
+*.iws
+
+# === Тестовые артефакты ===
+*.xml
+*.json
+*.png
+*.mp4
+
+# === BrowserStack, Allure, Appium временные ===
+output/
+logs/
+screenshots/
+appium.log
+
+# === Сам gitignore не пушим ===
+.gitignore
