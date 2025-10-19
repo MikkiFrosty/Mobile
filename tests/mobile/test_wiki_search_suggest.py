@@ -4,7 +4,7 @@ from utils.onboarding import skip_onboarding_if_present
 
 pytestmark = pytest.mark.mobile
 
-@allure.title("Поиск — показываются подсказки")
+@allure.title("Поиск — отображение подсказок")
 def test_wiki_search_suggest(mobile_driver):
     driver = mobile_driver
     try:
