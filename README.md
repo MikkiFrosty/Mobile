@@ -27,17 +27,16 @@
 ## Покрытый функционал
 > Мобильные тесты приложения **Wikipedia Android**
 
-- [x] **Онбординг:** `test_onboarding_flow` — проверка экранов и переходов  
-- [x] **Поиск и открытие статьи:** `test_open_first_article` — выдача по запросу и переход к первой статье  
-- [x] **Подсказки поиска:** `test_wiki_search_suggest` — отображение suggest-вариантов при вводе
+- [x] **Онбординг:** — проверка экранов и переходов  
+- [x] **Поиск и открытие статьи:** — выдача по запросу и переход к первой статье  
+- [x] **Подсказки поиска:** — отображение suggest-вариантов при вводе
 
 ## Jenkins
-> (пример ссылки на пайплайн) `https://jenkins.autotests.cloud/job/Mobile%20Test%20QA%20GURU/`
+[Перейти к Jenkins](https://jenkins.autotests.cloud/job/Mobile%20Test%20QA%20GURU/)
 
 <p align="center">
   <img src="images/jenkins_runs.png" alt="Jenkins: список запусков" width="900">
 </p>
-<p align="center"><em>Параметризованные сборки и ссылка на Allure после прогона</em></p>
 
 ### Параметризованный запуск (пример)
 В <code>Build with Parameters</code> можно задать: тип устройства (реальное/эмулятор), версию Android и региональные настройки.  
@@ -63,7 +62,7 @@ allure serve allure-results
 ```
 
 ## Allure Report
-> (пример ссылки на отчёт) `https://jenkins.autotests.cloud/job/Mobile%20Test%20QA%20GURU/55/allure/`
+[Пример Allure Report](https://jenkins.autotests.cloud/job/Mobile%20Test%20QA%20GURU/55/allure/)
 
 <p align="center">
   <img src="images/allure_overview.png" alt="Allure Report: успешные тесты" width="800">
